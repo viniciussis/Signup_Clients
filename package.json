@@ -1,10 +1,24 @@
 {
   "name": "signup-clients",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "Microsserviço de cadastro de clientes. Desafio técnico focado em Clean Architecture, SOLID, NestJS, MongoDB, Redis e RabbitMQ.",
+  "author": "Vinícius Silva Santos <vinicius01012@gmail.com>",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
+  "keywords": [
+    "nestjs",
+    "clean-architecture",
+    "solid",
+    "mongodb",
+    "redis",
+    "rabbitmq",
+    "docker",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/viniciussis/Signup_Clients.git"
+  },
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"{src,apps,libs,test}/**/*.{ts,tsx,js,jsx,json,md}\"",
