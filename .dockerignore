@@ -1,0 +1,22 @@
+# Ignora a pasta de dependências local.
+# Esta é a correção principal para o erro 'Cannot find module'.
+node_modules
+
+# Ignora a pasta de build (vamos gerar ela DENTRO do contêiner)
+dist
+
+# Ignora arquivos de ambiente
+.env
+.env.*
+
+# Ignora logs e cache
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Ignora o cache de testes
+coverage
+
+# Ignora o versionamento
+.git
+.gitignore
