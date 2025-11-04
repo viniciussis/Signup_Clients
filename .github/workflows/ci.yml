@@ -1,0 +1,44 @@
+name: CI - Build & Test
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: "pnpm"
+
+      - name: Instalar Dependências
+        run: pnpm install
+
+      - name: Rodar Linter (Check de Qualidade)
+        run: pnpm run lint
+
+      - name: Rodar Testes Unitários
+        run: pnpm run test
+
+      - name: Rodar Build (TypeScript)
+        run: pnpm run build
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Buildar Imagem Docker
+        run: docker build . --file Dockerfile --tag signup-clients:latest
