@@ -1,38 +1,44 @@
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { initializeRabbitMQ } from './infrastructure/messaging/rabbitmq/connection';
+import { connectDB } from './infrastructure/database/mongoose/connection';
+import { initializeRedis } from './infrastructure/cache/redis/connection';
+import express, { Request, Response, NextFunction } from 'express';
+import { AppError } from './infrastructure/http/errors/AppError';
+import { router } from './infrastructure/http/routes';
+import { StatusCodes } from 'http-status-codes';
+import 'express-async-errors';
+import 'dotenv/config';
 
-async function bootstrap() {
-  // 2. Cria a aplicação HTTP (API)
-  const app = await NestFactory.create(AppModule);
+const main = async () => {
+  await connectDB();
+  await initializeRedis();
+  await initializeRabbitMQ();
 
-  // Pega o ConfigService (já que o AppModule o torna global)
-  const configService = app.get(ConfigService);
+  const app = express();
+  const PORT = process.env.PORT || 3000;
 
-  // 3. Conecta o "listener" de Microserviço (RabbitMQ)
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.RMQ,
-    options: {
-      urls: [configService.getOrThrow<string>('RABBITMQ_URI')],
-      queue: 'clientes_queue',
-      queueOptions: {
-        durable: true,
-      },
+  app.use(express.json());
+  app.use(router);
+
+  app.use(
+    (err: Error, request: Request, response: Response, _: NextFunction) => {
+      if (err instanceof AppError) {
+        return response.status(err.statusCode).json({
+          status: 'error',
+          message: err.message,
+        });
+      }
+
+      console.error(err);
+      return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        status: 'error',
+        message: 'Internal Server Error',
+      });
     },
-  });
-
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
   );
 
-  // 4. Inicia TODOS os serviços (HTTP e Microserviço)
-  await app.startAllMicroservices();
-  await app.listen(configService.get<string>('PORT') || 3000);
-}
-void bootstrap();
+  app.listen(PORT, () =>
+    console.log(`🚀 Servidor Express rodando na porta ${PORT}`),
+  );
+};
+
+void main();
