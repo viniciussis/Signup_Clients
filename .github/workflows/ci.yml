@@ -2,16 +2,20 @@ name: CI - Build & Test
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - "main"
+      - "express-ts-implementation"
   pull_request:
-    branches: ["main"]
+    branches:
+      - "main"
+      - "express-ts-implementation"
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout (Baixar código)
         uses: actions/checkout@v4
 
       - name: Setup PNPM
