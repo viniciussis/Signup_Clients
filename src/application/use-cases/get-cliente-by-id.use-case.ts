@@ -1,24 +1,20 @@
 import { IClienteRepository } from '@/domain/repositories/cliente.repository.interface';
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { ICacheService } from '@/domain/services/cache.service.interface';
+import { AppError } from '@/infrastructure/http/errors/AppError';
 import { Cliente } from '@/domain/entities/cliente.entity';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import * as cacheManager from 'cache-manager';
+import { StatusCodes } from 'http-status-codes';
 
-@Injectable()
 export class GetClienteByIdUseCase {
   constructor(
-    @Inject(IClienteRepository)
     private readonly clienteRepository: IClienteRepository,
-
-    @Inject(CACHE_MANAGER)
-    private readonly cacheManager: cacheManager.Cache,
+    private readonly cacheService: ICacheService,
   ) {}
 
   async execute(id: string): Promise<Cliente> {
     const cacheKey = `cliente:${id}`;
 
     try {
-      const cachedCliente = await this.cacheManager.get<Cliente>(cacheKey);
+      const cachedCliente = await this.cacheService.get<Cliente>(cacheKey);
 
       if (cachedCliente) {
         return new Cliente(cachedCliente, {
@@ -34,11 +30,11 @@ export class GetClienteByIdUseCase {
     const cliente = await this.clienteRepository.findById(id);
 
     if (!cliente) {
-      throw new NotFoundException('Cliente não encontrado.');
+      throw new AppError('Cliente não encontrado.', StatusCodes.NOT_FOUND);
     }
 
     try {
-      await this.cacheManager.set(cacheKey, cliente);
+      await this.cacheService.set(cacheKey, cliente);
     } catch (error) {
       console.error('Erro ao salvar no cache:', error);
     }

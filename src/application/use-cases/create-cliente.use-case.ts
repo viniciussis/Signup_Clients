@@ -1,16 +1,13 @@
 import { IClienteRepository } from '@/domain/repositories/cliente.repository.interface';
 import { IMessagingService } from '@/domain/services/messaging.service.interface';
-import { Injectable, Inject, ConflictException } from '@nestjs/common';
-import { CreateClienteDto } from '../dtos/create-cliente.dto';
+import { CreateClienteDto } from '@/application/dtos/create-cliente.dto';
+import { AppError } from '@/infrastructure/http/errors/AppError';
 import { Cliente } from '@/domain/entities/cliente.entity';
+import { StatusCodes } from 'http-status-codes';
 
-@Injectable()
 export class CreateClienteUseCase {
   constructor(
-    @Inject(IClienteRepository)
     private readonly clienteRepository: IClienteRepository,
-
-    @Inject(IMessagingService)
     private readonly messagingService: IMessagingService,
   ) {}
 
@@ -18,7 +15,10 @@ export class CreateClienteUseCase {
     const emailExists = await this.clienteRepository.findByEmail(data.email);
 
     if (emailExists) {
-      throw new ConflictException('Um cliente com este e-mail já existe.');
+      throw new AppError(
+        'Um cliente com este e-mail já existe.',
+        StatusCodes.CONFLICT,
+      );
     }
 
     const clienteEntity = new Cliente({
@@ -30,7 +30,7 @@ export class CreateClienteUseCase {
     const novoCliente = await this.clienteRepository.create(clienteEntity);
 
     try {
-      this.messagingService.publish('cliente_created', novoCliente);
+      await this.messagingService.publish('cliente_created', novoCliente);
     } catch (error) {
       console.error('Falha ao publicar evento de cliente criado', error);
     }

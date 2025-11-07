@@ -1,29 +1,24 @@
 import { IClienteRepository } from '@/domain/repositories/cliente.repository.interface';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Injectable, Inject } from '@nestjs/common';
-import { NotFoundException } from '@nestjs/common';
-import * as cacheManager from 'cache-manager';
+import { ICacheService } from '@/domain/services/cache.service.interface';
+import { AppError } from '@/infrastructure/http/errors/AppError';
+import { StatusCodes } from 'http-status-codes';
 
-@Injectable()
 export class DeleteClienteUseCase {
   constructor(
-    @Inject(IClienteRepository)
     private readonly clienteRepository: IClienteRepository,
-
-    @Inject(CACHE_MANAGER)
-    private readonly cacheManager: cacheManager.Cache,
+    private readonly cacheService: ICacheService,
   ) {}
 
   async execute(id: string): Promise<void> {
     const wasDeleted = await this.clienteRepository.delete(id);
 
     if (!wasDeleted) {
-      throw new NotFoundException('Cliente não encontrado.');
+      throw new AppError('Cliente não encontrado.', StatusCodes.NOT_FOUND);
     }
 
     try {
       const cacheKey = `cliente:${id}`;
-      await this.cacheManager.del(cacheKey);
+      await this.cacheService.del(cacheKey);
     } catch (error) {
       console.error(
         `Falha ao invalidar cache para cliente deletado: ${id}`,
