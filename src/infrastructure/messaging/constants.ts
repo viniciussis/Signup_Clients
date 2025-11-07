@@ -1,1 +1,0 @@
-export const RABBITMQ_SERVICE = Symbol('RABBITMQ_SERVICE');
