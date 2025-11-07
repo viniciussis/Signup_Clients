@@ -1,21 +1,16 @@
 import { ICacheService } from '@/domain/services/cache.service.interface';
-import { redisClient } from './connection';
 import { Redis } from 'ioredis';
 
 export class RedisCacheService implements ICacheService {
-  private readonly client: Redis;
   private readonly defaultTTLInSeconds: number = 60;
 
-  constructor() {
-    this.client = redisClient;
-  }
+  constructor(private readonly client: Redis) {}
 
   async get<T>(key: string): Promise<T | null> {
     const data = await this.client.get(key);
     if (!data) {
       return null;
     }
-
     return JSON.parse(data) as T;
   }
 

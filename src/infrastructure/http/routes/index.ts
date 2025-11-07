@@ -1,12 +1,13 @@
-import { clienteRoutes } from './cliente.routes';
+import { StatusCodes } from 'http-status-codes';
 import { Router } from 'express';
 
 const router = Router();
 
 router.get('/health', (req, res) => {
-  return res.json({ status: 'ok', timestamp: new Date() });
+  return res.status(StatusCodes.OK).json({
+    status: 'ok',
+    timestamp: new Date(),
+  });
 });
-
-router.use('/clientes', clienteRoutes);
 
 export { router };
