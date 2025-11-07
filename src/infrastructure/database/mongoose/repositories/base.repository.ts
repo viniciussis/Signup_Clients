@@ -14,7 +14,7 @@ export abstract class MongooseBaseRepository<
   U,
 > implements IBaseRepository<T, U>
 {
-  constructor(private readonly model: Model<D>) {}
+  constructor(protected readonly model: Model<D>) {}
 
   protected abstract toEntity(document: D): T;
 

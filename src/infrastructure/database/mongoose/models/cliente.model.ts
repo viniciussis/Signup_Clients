@@ -1,28 +1,44 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
 
-@Schema({
-  timestamps: true,
-  collection: 'clientes',
-})
-export class ClienteModel {
-  @Prop({ required: true, type: String })
+export interface ICliente {
   nome: string;
-
-  @Prop({ required: true, unique: true, type: String, index: true })
   email: string;
-
-  @Prop({ required: true, type: String })
   telefone: string;
 }
 
-export type ClienteDocument = Document & {
+export interface ClienteDocument extends Document {
   _id: Types.ObjectId;
   nome: string;
   email: string;
   telefone: string;
   createdAt: Date;
   updatedAt: Date;
-};
+}
 
-export const ClienteSchema = SchemaFactory.createForClass(ClienteModel);
+const ClienteSchema = new Schema<ClienteDocument>(
+  {
+    nome: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
+    telefone: {
+      type: String,
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+    collection: 'clientes',
+  },
+);
+
+export const ClienteModel = mongoose.model<ClienteDocument>(
+  'Cliente',
+  ClienteSchema,
+);
