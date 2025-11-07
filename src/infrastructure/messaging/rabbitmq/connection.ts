@@ -11,7 +11,7 @@ const QUEUE_NAME = 'cliente_created';
 const handleClienteCreated = (data: Cliente) => {
   try {
     if (!data || !data.nome) {
-      console.warn('Mensagem malformada recebida:', data);
+      console.warn('Mensagem malformada recebida (após parse):', data);
       return;
     }
 
@@ -27,16 +27,24 @@ const handleClienteCreated = (data: Cliente) => {
 const setupConsumer = async (channel: Channel) => {
   try {
     await channel.assertQueue(QUEUE_NAME, { durable: true });
-
     console.log(`... Aguardando mensagens na fila: ${QUEUE_NAME}`);
+
     await channel.consume(
       QUEUE_NAME,
       (msg: ConsumeMessage | null) => {
         if (msg) {
-          const data = msg.content as unknown as Cliente;
-          handleClienteCreated(data);
-
-          channel.ack(msg);
+          try {
+            const contentString = msg.content.toString();
+            const data: Cliente = JSON.parse(contentString) as Cliente;
+            handleClienteCreated(data);
+            channel.ack(msg);
+          } catch (parseError) {
+            console.error(
+              'Erro ao fazer parse da mensagem JSON do RabbitMQ:',
+              parseError,
+            );
+            channel.ack(msg);
+          }
         }
       },
       { noAck: false },
