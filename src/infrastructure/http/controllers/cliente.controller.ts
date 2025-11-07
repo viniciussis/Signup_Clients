@@ -1,59 +1,52 @@
-import {
-  HttpStatus,
-  Controller,
-  HttpCode,
-  Delete,
-  Param,
-  Patch,
-  Post,
-  Body,
-  Get,
-} from '@nestjs/common';
 import { GetClienteByIdUseCase } from '@/application/use-cases/get-cliente-by-id.use-case';
-import { UpdateClienteUseCase } from '@/application/use-cases/update-cliente.use-case';
 import { CreateClienteUseCase } from '@/application/use-cases/create-cliente.use-case';
 import { DeleteClienteUseCase } from '@/application/use-cases/delete-cliente.use-case';
+import { UpdateClienteUseCase } from '@/application/use-cases/update-cliente.use-case';
 import { ListClientesUseCase } from '@/application/use-cases/list-clientes.use-case';
-import { CreateClienteDto } from '@/application/dtos/create-cliente.dto';
 import { UpdateClienteDto } from '@/application/dtos/update-cliente.dto';
+import { CreateClienteDto } from '@/application/dtos/create-cliente.dto';
+import { StatusCodes } from 'http-status-codes';
+import { Request, Response } from 'express';
 
-@Controller('clientes')
 export class ClienteController {
   constructor(
-    private readonly createClienteUseCase: CreateClienteUseCase,
     private readonly getClienteByIdUseCase: GetClienteByIdUseCase,
-    private readonly listClientesUseCase: ListClientesUseCase,
+    private readonly createClienteUseCase: CreateClienteUseCase,
     private readonly updateClienteUseCase: UpdateClienteUseCase,
     private readonly deleteClienteUseCase: DeleteClienteUseCase,
+    private readonly listClientesUseCase: ListClientesUseCase,
   ) {}
 
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createClienteDto: CreateClienteDto) {
-    return this.createClienteUseCase.execute(createClienteDto);
-  }
+  create = async (req: Request, res: Response) => {
+    const cliente = await this.createClienteUseCase.execute(
+      req.body as CreateClienteDto,
+    );
+    return res.status(StatusCodes.CREATED).json(cliente);
+  };
 
-  @Get()
-  async findAll() {
-    return this.listClientesUseCase.execute();
-  }
+  findAll = async (req: Request, res: Response) => {
+    const clientes = await this.listClientesUseCase.execute();
+    return res.status(StatusCodes.OK).json(clientes);
+  };
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.getClienteByIdUseCase.execute(id);
-  }
+  findOne = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const cliente = await this.getClienteByIdUseCase.execute(id);
+    return res.status(StatusCodes.OK).json(cliente);
+  };
 
-  @Patch(':id')
-  async update(
-    @Param('id') id: string,
-    @Body() updateClienteDto: UpdateClienteDto,
-  ) {
-    return this.updateClienteUseCase.execute(id, updateClienteDto);
-  }
+  update = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const cliente = await this.updateClienteUseCase.execute(
+      id,
+      req.body as UpdateClienteDto,
+    );
+    return res.status(StatusCodes.OK).json(cliente);
+  };
 
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async delete(@Param('id') id: string) {
-    return this.deleteClienteUseCase.execute(id);
-  }
+  delete = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    await this.deleteClienteUseCase.execute(id);
+    return res.status(StatusCodes.NO_CONTENT).send();
+  };
 }
