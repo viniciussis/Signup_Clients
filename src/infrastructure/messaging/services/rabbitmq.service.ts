@@ -1,26 +1,28 @@
 import { IMessagingService } from '@/domain/services/messaging.service.interface';
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { RABBITMQ_SERVICE } from '../constants';
+import { ChannelWrapper } from 'amqp-connection-manager';
+import { rabbitMQChannel } from '../rabbitmq/connection';
 
-@Injectable()
-export class RabbitMQMessagingService
-  implements IMessagingService, OnModuleInit
-{
-  constructor(
-    @Inject(RABBITMQ_SERVICE)
-    private readonly client: ClientProxy,
-  ) {}
+const QUEUE_NAME = 'clientes_queue';
 
-  async onModuleInit() {
-    try {
-      await this.client.connect();
-    } catch (error) {
-      console.error('Falha ao conectar ao RabbitMQ', error);
-    }
+export class RabbitMQMessagingService implements IMessagingService {
+  private readonly channel: ChannelWrapper;
+
+  constructor() {
+    this.channel = rabbitMQChannel;
   }
 
-  publish(topic: string, message: any) {
-    return this.client.emit(topic, message);
+  async publish(topic: string, message: any): Promise<void> {
+    try {
+      await this.channel.assertQueue(QUEUE_NAME, { durable: true });
+
+      const queueName = topic;
+      await this.channel.assertQueue(queueName, { durable: true });
+
+      await this.channel.sendToQueue(queueName, message);
+    } catch (error) {
+      console.error('Falha ao publicar mensagem no RabbitMQ', error);
+
+      throw error;
+    }
   }
 }
