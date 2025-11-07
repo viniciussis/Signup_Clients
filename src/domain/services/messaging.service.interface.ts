@@ -1,7 +1,5 @@
-import { Observable } from 'rxjs';
-
 export interface IMessagingService {
-  publish(topic: string, message: any): Observable<void>;
+  publish(topic: string, message: any): Promise<void>;
 }
 
 export const IMessagingService = Symbol('IMessagingService');
