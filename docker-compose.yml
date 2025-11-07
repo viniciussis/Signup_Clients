@@ -3,13 +3,10 @@ services:
     build: .
     container_name: cliente_api
     ports:
-      - "3000:3000"
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
+      - "3001:3001"
     environment:
       - NODE_ENV=development
-      - PORT=3000
+      - PORT=3001
       - MONGO_URI=mongodb://mongo:27017/clientesdb
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -18,7 +15,6 @@ services:
       - mongo
       - redis
       - rabbitmq
-    command: pnpm run start:dev
 
   mongo:
     image: mongo:latest
