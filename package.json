@@ -1,12 +1,12 @@
 {
   "name": "signup-clients",
   "version": "0.0.1",
-  "description": "Microsserviço de cadastro de clientes. Desafio técnico focado em Clean Architecture, SOLID, NestJS, MongoDB, Redis e RabbitMQ.",
+  "description": "Microsserviço de cadastro de clientes. Desafio técnico focado em Clean Architecture, SOLID, Express, MongoDB, Redis e RabbitMQ.",
   "author": "Vinícius Silva Santos <vinicius01012@gmail.com>",
   "private": true,
   "license": "MIT",
   "keywords": [
-    "nestjs",
+    "express",
     "clean-architecture",
     "solid",
     "mongodb",
@@ -30,8 +30,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
   },
   "dependencies": {
     "amqp-connection-manager": "^5.0.0",
