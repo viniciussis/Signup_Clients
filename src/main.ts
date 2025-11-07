@@ -5,13 +5,12 @@ import express, { Request, Response, NextFunction } from 'express';
 import { AppError } from './infrastructure/http/errors/AppError';
 import { router } from './infrastructure/http/routes';
 import { StatusCodes } from 'http-status-codes';
-import 'express-async-errors';
 import 'dotenv/config';
 
 const main = async () => {
   await connectDB();
   await initializeRedis();
-  await initializeRabbitMQ();
+  initializeRabbitMQ();
 
   const app = express();
   const PORT = process.env.PORT || 3000;
